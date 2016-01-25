@@ -26,14 +26,16 @@ import java.util.LinkedList;
 public class PathlyDijkstra extends FindPath {
     public static final String NAME = "dijkstra";
 
-    private String             paramWeightFieldName;
+    private String paramWeightFieldName;
 
     public PathlyDijkstra() {
         super(NAME, 3, 4);
     }
 
     public LinkedList<OrientVertex> executePathlyDij(Object iThis, OIdentifiable iCurrentRecord, Object iCurrentResult,
-                                            final Object[] iParams, OCommandContext iContext,String first,String[] second) {
+                                                     final Object[] iParams, OCommandContext iContext,
+                                                     String first, String[] second) {
+
         final OModifiableBoolean shutdownFlag = new OModifiableBoolean();
         ODatabaseDocumentInternal curDb = ODatabaseRecordThreadLocal.INSTANCE.get();
         final OrientBaseGraph graph = OGraphCommandExecutorSQLFactory.getGraph(false, shutdownFlag);
