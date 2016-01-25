@@ -15,6 +15,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.impls.orient.OrientBaseGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
+import model.DijkstraResult;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,9 +33,9 @@ public class PathlyDijkstra extends FindPath {
         super(NAME, 3, 4);
     }
 
-    public LinkedList<OrientVertex> executePathlyDij(Object iThis, OIdentifiable iCurrentRecord, Object iCurrentResult,
-                                                     final Object[] iParams, OCommandContext iContext,
-                                                     String first, String[] second) {
+    public DijkstraResult executePathlyDij(Object iThis, OIdentifiable iCurrentRecord, Object iCurrentResult,
+                                           final Object[] iParams, OCommandContext iContext,
+                                           String first, String[] second) {
 
         final OModifiableBoolean shutdownFlag = new OModifiableBoolean();
         ODatabaseDocumentInternal curDb = ODatabaseRecordThreadLocal.INSTANCE.get();
@@ -81,7 +82,7 @@ public class PathlyDijkstra extends FindPath {
         return "dijkstra(<sourceVertex>, <destinationVertex>, <weightEdgeFieldName>, [<direction>])";
     }
 
-    protected float getDistance(final OrientVertex node, final OrientVertex target) {
+    public float getDistance(final OrientVertex node, final OrientVertex target) {
         final Iterator<Edge> edges = node.getEdges(target, paramDirection).iterator();
         if (edges.hasNext()) {
             final Edge e = edges.next();
