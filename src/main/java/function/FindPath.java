@@ -23,14 +23,14 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
     protected OrientBaseGraph db;
     protected Set<OrientVertex> unSettledNodes;
     protected Map<ORID, OrientVertex> predecessors;
-    protected Map<ORID, Float>        distance;
+    protected Map<ORID, Float> distance;
 
-    protected OrientVertex            paramSourceVertex;
-    protected OrientVertex            paramDestinationVertex;
+    protected OrientVertex paramSourceVertex;
+    protected OrientVertex paramDestinationVertex;
     protected Direction paramDirection = Direction.OUT;
     protected OCommandContext context;
 
-    protected static final float      MIN            = 0f;
+    protected static final float MIN = 0f;
 
     public FindPath(final String iName, final int iMinParams, final int iMaxParams) {
         super(iName, iMinParams, iMaxParams);
@@ -64,7 +64,7 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
                 // FOUND
                 break;
 
-            if( !OCommandExecutorAbstract.checkInterruption(context) )
+            if (!OCommandExecutorAbstract.checkInterruption(context))
                 break;
         }
 
@@ -72,16 +72,10 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
         context.setVariable("maxSettled", maxSettled);
         context.setVariable("maxUnSettled", maxUnSettled);
         context.setVariable("maxPredecessors", maxPredecessors);
-//        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-//        System.out.println("^^^^^^^^^^ distance : " + distance.get() + "^^^^^^^^^^^");
-//
-//        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-
         LinkedList<OrientVertex> result = getPath();
-        DijkstraResult dijResult = new DijkstraResult(result,distance.get(result.get(result.size()-1).getIdentity()));
-        float[] rootPathCost = new float[result.size()-1];
-
-        for(int i = 0; i < result.size() - 1; i++){
+        DijkstraResult dijResult = new DijkstraResult(result, distance.get(result.get(result.size() - 1).getIdentity()));
+        float[] rootPathCost = new float[result.size() - 1];
+        for (int i = 0; i < result.size() - 1; i++) {
             rootPathCost[i] = distance.get(result.get(i).getIdentity());
         }
         dijResult.setRootPathCost(rootPathCost);
@@ -140,37 +134,37 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
     protected Set<OrientVertex> getNeighbors(final Vertex node) {
         context.incrementVariable("getNeighbors");
         final Set<OrientVertex> neighbors = new HashSet<OrientVertex>();
-
         OrientVertex currentV = (OrientVertex) node;
-//        System.out.println("Current V : "  + currentV.getIdentity().toString());
+
+        // System.out.println("Current V : "  + currentV.getIdentity().toString());
         if (node != null) {
             for (Vertex v : node.getVertices(paramDirection)) {
                 final OrientVertex ov = (OrientVertex) v;
-                if (ov != null && isNotSettled(ov)){
+                if (ov != null && isNotSettled(ov)) {
 //                    System.out.println("- getNeighbors ov rid = " + ov.getIdentity().toString());
-
-                    if(currentV.getIdentity().toString().equals(spurNode) ){
+                    if (currentV.getIdentity().toString().equals(spurNode)) {
 //                      System.out.println("In beware confition = " + currentV.getIdentity().toString());
-                      if(!checkIngnore(ov.getIdentity().toString()))
-                         neighbors.add(ov);
-
-                    }else{
+                        if (!checkIngnore(ov.getIdentity().toString()))
+                            neighbors.add(ov);
+                    } else {
                         neighbors.add(ov);
                     }
 
                 }
 
             }
+
         }
         return neighbors;
     }
-    public boolean checkIngnore(String neigbor){
-        for(String ignore:ignoredNode){
-            if(neigbor.equals(ignore)){
+
+    public boolean checkIngnore(String neigbor) {
+        for (String ignore : ignoredNode) {
+            if (neigbor.equals(ignore)) {
                 return true;
             }
         }
-        return  false;
+        return false;
     }
 
     protected OrientVertex getMinimum(final Set<OrientVertex> vertexes) {

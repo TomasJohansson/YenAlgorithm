@@ -1,6 +1,12 @@
 package function;
 
 import com.orientechnologies.orient.core.command.OBasicCommandContext;
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
+import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.sql.OCommandSQL;
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
+import com.orientechnologies.orient.graph.sql.OGraphCommandExecutorSQLFactory;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 import model.DijkstraResult;
 
@@ -18,8 +24,7 @@ public class PathlyYen {
     OrientVertex spurNode;
     ArrayList<OrientVertex> rootPath, pPath;
     float[] costColect;
-
-
+    OrientGraph graph;
     //Constructor 1
     public PathlyYen() {
         pathlyDij = new PathlyDijkstra();
@@ -28,7 +33,6 @@ public class PathlyYen {
         rootPath = new ArrayList<>();
         pPath = new ArrayList<>();
         listBB = new ArrayList<>();
-
     }
 
     /**
@@ -39,6 +43,28 @@ public class PathlyYen {
      * @param K           number of shortest path
      */
     public void excute(String source, String destination, Integer K) {
+        //Count All vertex
+        int numberOfAllVertex = 0;
+        int vertexCount = 0;
+        String path = "remote:128.199.166.185/Demo2";
+        this.graph = new OrientGraph(path);
+        String sql = "SELECT COUNT(*) as countall FROM Station";
+
+        List<ODocument> result = null;
+        try {
+            result =  graph.getRawGraph().query(
+                    new OSQLSynchQuery(sql));
+        } catch (Exception e) {
+            this.graph.rollback();
+        } finally {
+            this.graph.shutdown();
+        }
+        for(ODocument doc :result){
+            numberOfAllVertex = Integer.parseInt(doc.field("countall").toString());
+        }
+
+        System.out.println("--- Count All Vertex :" + numberOfAllVertex);
+
 
         DijkstraResult dijkstraResult;
         float[] rootPathCost;
@@ -50,14 +76,16 @@ public class PathlyYen {
         printDijkstraResult(dijkstraResult);
         listA.add(dijkstraResult.getShortestPath());
 
-        for (int round = 1; round <= K; round++) {
+        for (int round = 1; round < K; round++) {
             System.out.println(" ##########################################################");
             System.out.println(" ------- Round :" + round + " finding all the deviations(potential KSP)");
             System.out.println(" ##########################################################");
 
             int listAIden = listA.size() - 1;
 
-            for (int potentailKSP = 0; potentailKSP < listA.get(listAIden).size() - 1; potentailKSP++) {
+            for (int potentailKSP = 0; (potentailKSP < listA.get(listAIden).size() - 1) &&(vertexCount < numberOfAllVertex -1);
+                 potentailKSP++, vertexCount++) {
+
                 System.out.println("\n\n>------ Find Potential :" + potentailKSP + " ------<");
 
                 spurNode = listA.get(listAIden).get(potentailKSP);
@@ -74,34 +102,23 @@ public class PathlyYen {
                 printList(rootPath);
                 System.out.println("--- Root Path Cost :" + rootPathCost[potentailKSP]);
 
-                String firstIngnore = spurNode.getIdentity().toString();
-
-                List<String> ignore = new ArrayList<String>();
+                String spur = spurNode.getIdentity().toString();
+                List<String> ignore =  addIgnoreFromListA(spurNode);
                 System.out.print("--- KSP use in " + round + " : ");
                 printList(listA.get(listAIden));
                 System.out.print("\n--- Now ListA ---");
                 printLisOfLis(listA);
-
                 // TODO: The way to ignore the links that are part of the previous shortest paths which share the same root path.
                 /////////////////// Not done yet.
-                addIgnoreFromListA(ignore);
-                String[] secondeIgnore = ignore.toArray(new String[ignore.size()]);
+                String[] nextIgnore = ignore.toArray(new String[ignore.size()]);
                 System.out.print("\n--- Ignore Array  --- ");
-                printListString(secondeIgnore);
-
+                printListString(nextIgnore);
                 // Calculate the spur path from the spur node to the destination.
-                System.out.print("--- Parameters for dijkstra -- sorce :" + spurNode.getIdentity().toString() +
-                        ",dest :" + destination + ",rootIgnorepath :" + firstIngnore + ",ignorepath : ");
-                printListString(secondeIgnore);
-
                 // Need to collect cost collection
                 dijkstraResult = pathlyDij.executePathlyDij(null, null, null, new Object[]{spurNode.getIdentity().toString(), destination, "'distance'", "out"},
-                        new OBasicCommandContext(), firstIngnore, secondeIgnore);
-
-
+                        new OBasicCommandContext(), spur, nextIgnore);
                 System.out.print("--- new SpurPath : ");
                 printDijkstraResult(dijkstraResult);
-
                 // Entire path is made up of the root path and spur path.
                 LinkedList<OrientVertex> totalPath = new LinkedList<OrientVertex>();
                 totalPath.addAll(rootPath);
@@ -167,16 +184,18 @@ public class PathlyYen {
         return lowestCost;
     }
 
-    public void addIgnoreFromListA(List<String> ignore) {
+    public List<String> addIgnoreFromListA(OrientVertex spurNode) {
         String spur = spurNode.getIdentity().toString();
+        List<String> ignore = new ArrayList<>();
         for (LinkedList<OrientVertex> als : listA) {
             for (OrientVertex a : als) {
-                if(spur.equals(a.getIdentity().toString()) && als.indexOf(a) < als.size() - 2 ){
+                if(spur.equals(a.getIdentity().toString()) && als.indexOf(a) < als.size() - 1 ){
                     String nextIgnore = als.get(als.indexOf(a) + 1).getIdentity().toString();
                     ignore.add(nextIgnore);
                 }
             }
         }
+        return ignore;
     }
 
     public void printList(LinkedList<OrientVertex> ls) {
