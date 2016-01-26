@@ -4,39 +4,30 @@ import com.orientechnologies.orient.core.command.OBasicCommandContext;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 import model.DijkstraResult;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * Created by Tkaewkunha on 1/24/16.
  */
 public class PathlyYen {
-    public PathlyDijkstra pathlyDij;
+    PathlyDijkstra pathlyDij;
     //list A & B for keeping K Shortest Path answer and Spur Path
-    public List<LinkedList<OrientVertex>> listA, listB;
-    public List<DijkstraResult> listBB;
-    PriorityQueue<DijkstraResult> listBQueue;
-    public OrientVertex spurNode;
-    public ArrayList<OrientVertex> rootPath, pPath;
-    public float[] costColect;
-
+    List<LinkedList<OrientVertex>> listA;
+    List<DijkstraResult> listB;
+    List<DijkstraResult> listBB;
+    OrientVertex spurNode;
+    ArrayList<OrientVertex> rootPath, pPath;
+    float[] costColect;
 
 
     //Constructor 1
     public PathlyYen() {
         pathlyDij = new PathlyDijkstra();
-        listA = new ArrayList<LinkedList<OrientVertex>>();
-        listB = new ArrayList<LinkedList<OrientVertex>>();
-        rootPath = new ArrayList<OrientVertex>();
-        pPath = new ArrayList<OrientVertex>();
-        listBB = new ArrayList<DijkstraResult>();
-
-        listBQueue = new PriorityQueue<>();
-
-//        listBCost = new ArrayList<int>();
-//        listACost = new ArrayList<int>();
+        listA = new ArrayList<>();
+        listB = new ArrayList<>();
+        rootPath = new ArrayList<>();
+        pPath = new ArrayList<>();
+        listBB = new ArrayList<>();
 
     }
 
@@ -85,23 +76,23 @@ public class PathlyYen {
 
                 String firstIngnore = spurNode.getIdentity().toString();
 
-                List<String> secondeIgnoreList = new ArrayList<String>();
-                System.out.print("--- KSP use in " + round +" : ");
+                List<String> ignore = new ArrayList<String>();
+                System.out.print("--- KSP use in " + round + " : ");
                 printList(listA.get(listAIden));
                 System.out.print("\n--- Now ListA ---");
                 printLisOfLis(listA);
 
                 // TODO: The way to ignore the links that are part of the previous shortest paths which share the same root path.
-                secondeIgnoreList.add(listA.get(listAIden).get(potentailKSP + 1).getIdentity().toString());
                 /////////////////// Not done yet.
-                addSecondFromListA(secondeIgnoreList);
-                String[] secondeIgnore = secondeIgnoreList.toArray(new String[secondeIgnoreList.size()]);
-                System.out.print("--- SecondIgnoreArray  --- ");
+                addIgnoreFromListA(ignore);
+                String[] secondeIgnore = ignore.toArray(new String[ignore.size()]);
+                System.out.print("\n--- Ignore Array  --- ");
                 printListString(secondeIgnore);
 
                 // Calculate the spur path from the spur node to the destination.
-                System.out.print("--- Parameters for dijkstra -- sorce :" + spurNode.getIdentity().toString()+
-                ",dest :" + destination + ",rootIgnorepath :" + firstIngnore + ",ignorepath : ");printListString(secondeIgnore);
+                System.out.print("--- Parameters for dijkstra -- sorce :" + spurNode.getIdentity().toString() +
+                        ",dest :" + destination + ",rootIgnorepath :" + firstIngnore + ",ignorepath : ");
+                printListString(secondeIgnore);
 
                 // Need to collect cost collection
                 dijkstraResult = pathlyDij.executePathlyDij(null, null, null, new Object[]{spurNode.getIdentity().toString(), destination, "'distance'", "out"},
@@ -122,59 +113,74 @@ public class PathlyYen {
                 System.out.println(" (" + totalCost + ")");
 
                 // TODO: Add the potential k-shortest path to the ListB.
-                // note. use "Set" because each element can only exists once in a Set.
-                //listBB.add(new DijkstraResult(totalPath,totalCost));
-                float[] newRootPathCost = new float[totalPath.size() -1];
-                for(int i = 0; i <= potentailKSP; i++){
-                   newRootPathCost[i] = rootPathCost[i];
+                float[] newRootPathCost = new float[totalPath.size() - 1];
+                for (int i = 0; i <= potentailKSP; i++) {
+                    newRootPathCost[i] = rootPathCost[i];
                 }
-                for(int i = potentailKSP; i < totalPath.size()-1; i++){
-                    newRootPathCost[i] = rootPathCost[potentailKSP] + dijkstraResult.getRootPathCost()[i-potentailKSP];
+                for (int i = potentailKSP; i < totalPath.size() - 1; i++) {
+                    newRootPathCost[i] = rootPathCost[potentailKSP] + dijkstraResult.getRootPathCost()[i - potentailKSP];
                 }
                 System.out.println("*** Print newRootPathCost ***");
                 printArray(newRootPathCost);
-
-                // TODO: Sort the potential k-shortest paths by cost. (Sort ListB)
-                listBQueue.add(new DijkstraResult(totalPath, totalCost, newRootPathCost));
+                // add it to list B
+                addDijkstraResultToListB(new DijkstraResult(totalPath, totalCost, newRootPathCost));
+                System.out.println("><><><><><>< listB ><><><><><>< ");
+                printListDijkstraResult(listB);
 
             }
 
+            // TODO: Sort the potential k-shortest paths by cost. (Sort ListB)
             // TODO: Add the lowest cost path becomes the k-shortest path. (Add to ListA)
-
-//            listA.add(listB.get(1));
-            System.out.print("><><><><><>< listA -- ");
+            DijkstraResult lowestCostDijkstra = popLowestCostFromListB();
+            listA.add(lowestCostDijkstra.getShortestPath());
+            rootPathCost = lowestCostDijkstra.getRootPathCost();
+            System.out.print("\n><><><><><>< listA -- ");
             printLisOfLis(listA);
-
-//            listB.remove(1);
-            System.out.println("\n><><><><><>< listB -- ");
-            printLisOfLis(listB);
+            System.out.println("\n><><><><><>< listB ><><><><><>< ");
+            printListDijkstraResult(listB);
+            System.out.print("\n");
 
         }
 
     }
 
-    public void addSecondFromListA(List<String> second) {
-        if (listA.size() > 1) {
-
-            String firstIgnore = second.get(0);
-            System.out.println("\n--- Inside AddSecondIngore : ");
-            for (LinkedList<OrientVertex> als : listA) {
-                System.out.println("--- first Ingore : " + firstIgnore);
-                for (OrientVertex a : als) {
-                    if(firstIgnore.equals(a.getIdentity().toString()) && als.indexOf(a) < als.size() - 2 ){
-                        System.out.println(" --- In Alist  : " + a.getIdentity().toString());
-                        String nextIgnore = als.get(als.indexOf(a) + 1).getIdentity().toString();
-                        System.out.println("--- NextIngore : " + nextIgnore);
-                        second.add(nextIgnore);
+    private void addDijkstraResultToListB(DijkstraResult newDijkstraResult) {
+        if(listB.size() == 0){
+            listB.add(newDijkstraResult);
+        } else {
+            for (int i = 0; i < listB.size(); i++) {
+                if (listB.get(i).compareTo(newDijkstraResult) != 0) {
+                    if(i == (listB.size()-1)) {
+                        listB.add(newDijkstraResult);
                     }
+                } else {
+                    break;
                 }
             }
         }
-        System.out.println("");
+    }
+
+    private DijkstraResult popLowestCostFromListB() {
+        Collections.sort(listB);
+        DijkstraResult lowestCost = listB.get(0);
+        listB.remove(0);
+        return lowestCost;
+    }
+
+    public void addIgnoreFromListA(List<String> ignore) {
+        String spur = spurNode.getIdentity().toString();
+        for (LinkedList<OrientVertex> als : listA) {
+            for (OrientVertex a : als) {
+                if(spur.equals(a.getIdentity().toString()) && als.indexOf(a) < als.size() - 2 ){
+                    String nextIgnore = als.get(als.indexOf(a) + 1).getIdentity().toString();
+                    ignore.add(nextIgnore);
+                }
+            }
+        }
     }
 
     public void printList(LinkedList<OrientVertex> ls) {
-        if(ls == null){
+        if (ls == null) {
             return;
         }
         for (OrientVertex v : ls) {
@@ -216,17 +222,27 @@ public class PathlyYen {
         }
         System.out.print("]");
     }
-    public void printDijkstraResult(DijkstraResult result){
-        LinkedList<OrientVertex> shotestPath  = result.getShortestPath();
+
+    public void printDijkstraResult(DijkstraResult result) {
+        LinkedList<OrientVertex> shotestPath = result.getShortestPath();
         float totalDistance = result.getTotalCost();
         printList(shotestPath);
         System.out.print("(" + totalDistance + ")");
         printArray(result.getRootPathCost());
 
     }
-    public void printArray(float[] fArr){
+
+    public void printListDijkstraResult(List<DijkstraResult> dijkstraResults) {
+        for (int i = 0; i < dijkstraResults.size(); i++) {
+            System.out.print("[" + i + "]");
+            printDijkstraResult(dijkstraResults.get(i));
+        }
+    }
+
+
+    public void printArray(float[] fArr) {
         System.out.print("{ ");
-        for (float f:fArr){
+        for (float f : fArr) {
             System.out.print(f + " , ");
         }
         System.out.println("}");

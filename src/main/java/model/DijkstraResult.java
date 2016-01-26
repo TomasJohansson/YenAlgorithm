@@ -46,25 +46,30 @@ public class DijkstraResult implements Comparable<DijkstraResult> {
         this.rootPathCost = rootPathCost;
     }
 
+    /**
+     *
+     * @param compareDijkstraResult
+     * @return Ascending order,
+     * Return 1 = more than compareDijkstraResult
+     * Return -1 = less than compareDijkstraResult or All of properties is equal but it's not the same path.
+     * Retun  0 = equal compareDijkstraResult;
+     */
     @Override
-    public int compareTo(DijkstraResult dijkstraResult) {
-        //Return 1 = add at Last;
-        //Return -1 = add (Last-1);
-        //Retun 0 no add;
-        if(totalCost > dijkstraResult.totalCost){
+    public int compareTo(DijkstraResult compareDijkstraResult) {
+        if(totalCost > compareDijkstraResult.totalCost){
            return  1;
-        }else if(totalCost < dijkstraResult.totalCost){
+        }else if(totalCost < compareDijkstraResult.totalCost){
             return -1;
         }else{
-            if(this.getShortestPath().size() > dijkstraResult.getShortestPath().size()){
+            if(this.getShortestPath().size() > compareDijkstraResult.getShortestPath().size()){
                 return  1;
-            }else if(this.getShortestPath().size() < dijkstraResult.getShortestPath().size()){
+            }else if(this.getShortestPath().size() < compareDijkstraResult.getShortestPath().size()){
                 return -1;
             }else{
-                if(this.comparePath(dijkstraResult)){
+                if(this.comparePath(compareDijkstraResult)){
                     return 0;
                 }else{
-                    return 1;
+                    return -1;
                 }
             }
         }
