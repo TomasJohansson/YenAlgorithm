@@ -34,13 +34,14 @@ public class PathlyYen {
         pPath = new ArrayList<>();
         listBB = new ArrayList<>();
     }
-
     /**
      * Yen's algorithm computes single-source K-shortest loopless paths for a graph with non-negative edge cost.
      *
      * @param source      start vertex of path
      * @param destination destination vertex of path
      * @param K           number of shortest path
+     * @param weightParam propertiy "'distance'"
+     * @param direction in,out,both "both"
      */
     public void excute(String source, String destination, Integer K,String weightParam,String direction) {
         //Count All vertex
