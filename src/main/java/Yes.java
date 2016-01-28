@@ -22,7 +22,7 @@ public class Yes {
         OrientGraphFactory factory = new OrientGraphFactory(path);
         ODatabaseRecordThreadLocal.INSTANCE.set(factory.getDatabase());
         PathlyYen yen = new PathlyYen();
-        yen.excute("#12:6","#12:11",3);
+        yen.excute("#12:6","#12:11",3,"'distance'","out");
     }
 
 }
