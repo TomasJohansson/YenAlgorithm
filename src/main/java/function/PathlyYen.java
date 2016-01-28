@@ -34,15 +34,16 @@ public class PathlyYen {
         pPath = new ArrayList<>();
         listBB = new ArrayList<>();
     }
-
     /**
      * Yen's algorithm computes single-source K-shortest loopless paths for a graph with non-negative edge cost.
      *
      * @param source      start vertex of path
      * @param destination destination vertex of path
      * @param K           number of shortest path
+     * @param weightParam propertiy "'distance'"
+     * @param direction in,out,both "both"
      */
-    public void excute(String source, String destination, Integer K) {
+    public void excute(String source, String destination, Integer K,String weightParam,String direction) {
         //Count All vertex
         int numberOfAllVertex = 0;
         int vertexCount = 0;
@@ -69,7 +70,7 @@ public class PathlyYen {
         DijkstraResult dijkstraResult;
         float[] rootPathCost;
         //Step 0: First  Call dijkstra
-        dijkstraResult = pathlyDij.executePathlyDij(null, null, null, new Object[]{source, destination, "'distance'", "out"},
+        dijkstraResult = pathlyDij.executePathlyDij(null, null, null, new Object[]{source, destination, weightParam, direction},
                 new OBasicCommandContext(), null, new String[]{null});
         rootPathCost = dijkstraResult.getRootPathCost();
         System.out.println("<------- 1st Shortest Path");
@@ -83,8 +84,8 @@ public class PathlyYen {
 
             int listAIden = listA.size() - 1;
 
-            for (int potentailKSP = 0; (potentailKSP < listA.get(listAIden).size() - 1) &&(vertexCount < numberOfAllVertex -1);
-                 potentailKSP++, vertexCount++) {
+            for (int potentailKSP = 0; potentailKSP < listA.get(listAIden).size() - 1 ;
+                 potentailKSP++) {
 
                 System.out.println("\n\n>------ Find Potential :" + potentailKSP + " ------<");
 
@@ -111,12 +112,21 @@ public class PathlyYen {
                 // TODO: The way to ignore the links that are part of the previous shortest paths which share the same root path.
                 /////////////////// Not done yet.
                 String[] nextIgnore = ignore.toArray(new String[ignore.size()]);
+
+                //Delete Duplicate value in Ignore Array
+                Set<String> setIgnore = new HashSet<>(Arrays.asList(nextIgnore));
+                nextIgnore = setIgnore.toArray(new String[0]);
+
                 System.out.print("\n--- Ignore Array  --- ");
                 printListString(nextIgnore);
                 // Calculate the spur path from the spur node to the destination.
                 // Need to collect cost collection
-                dijkstraResult = pathlyDij.executePathlyDij(null, null, null, new Object[]{spurNode.getIdentity().toString(), destination, "'distance'", "out"},
+                dijkstraResult = pathlyDij.executePathlyDij(null, null, null, new Object[]{spurNode.getIdentity().toString(), destination, weightParam, direction},
                         new OBasicCommandContext(), spur, nextIgnore);
+                if(dijkstraResult == null){
+                    System.out.println(".....This is the end....");
+                    return;
+                }
                 System.out.print("--- new SpurPath : ");
                 printDijkstraResult(dijkstraResult);
                 // Entire path is made up of the root path and spur path.

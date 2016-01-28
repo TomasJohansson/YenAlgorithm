@@ -72,16 +72,21 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
         context.setVariable("maxSettled", maxSettled);
         context.setVariable("maxUnSettled", maxUnSettled);
         context.setVariable("maxPredecessors", maxPredecessors);
-        LinkedList<OrientVertex> result = getPath();
-        DijkstraResult dijResult = new DijkstraResult(result, distance.get(result.get(result.size() - 1).getIdentity()));
-        float[] rootPathCost = new float[result.size() - 1];
-        for (int i = 0; i < result.size() - 1; i++) {
-            rootPathCost[i] = distance.get(result.get(i).getIdentity());
-        }
-        dijResult.setRootPathCost(rootPathCost);
-        distance = null;
+//        System.out.println("{{{{{{{{}}}}}}} distance.size = " + distance.size());
+        if(distance.size() <= 1){
+            return null;
+        }else {
+            LinkedList<OrientVertex> result = getPath();
+            DijkstraResult dijResult = new DijkstraResult(result, distance.get(result.get(result.size() - 1).getIdentity()));
+            float[] rootPathCost = new float[result.size() - 1];
+            for (int i = 0; i < result.size() - 1; i++) {
+                rootPathCost[i] = distance.get(result.get(i).getIdentity());
+            }
+            dijResult.setRootPathCost(rootPathCost);
+            distance = null;
 
-        return dijResult;
+            return dijResult;
+        }
     }
 
     protected boolean isVariableEdgeWeight() {
@@ -135,10 +140,10 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
         context.incrementVariable("getNeighbors");
         final Set<OrientVertex> neighbors = new HashSet<OrientVertex>();
         OrientVertex currentV = (OrientVertex) node;
-
+        Iterable<Vertex> neighborList = node.getVertices(paramDirection);
         // System.out.println("Current V : "  + currentV.getIdentity().toString());
         if (node != null) {
-            for (Vertex v : node.getVertices(paramDirection)) {
+            for (Vertex v : neighborList) {
                 final OrientVertex ov = (OrientVertex) v;
                 if (ov != null && isNotSettled(ov)) {
 //                    System.out.println("- getNeighbors ov rid = " + ov.getIdentity().toString());
@@ -157,7 +162,6 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
         }
         return neighbors;
     }
-
     public boolean checkIngnore(String neigbor) {
         for (String ignore : ignoredNode) {
             if (neigbor.equals(ignore)) {
