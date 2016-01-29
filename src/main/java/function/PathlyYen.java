@@ -125,7 +125,7 @@ public class PathlyYen {
                         new OBasicCommandContext(), spur, nextIgnore);
                 if(dijkstraResult == null){
                     System.out.println(".....This is the end....");
-                    return;
+                    break;
                 }
                 System.out.print("--- new SpurPath : ");
                 printDijkstraResult(dijkstraResult);
@@ -158,9 +158,13 @@ public class PathlyYen {
 
             // TODO: Sort the potential k-shortest paths by cost. (Sort ListB)
             // TODO: Add the lowest cost path becomes the k-shortest path. (Add to ListA)
-            DijkstraResult lowestCostDijkstra = popLowestCostFromListB();
-            listA.add(lowestCostDijkstra.getShortestPath());
-            rootPathCost = lowestCostDijkstra.getRootPathCost();
+            if(listB.size() > 0) {
+                DijkstraResult lowestCostDijkstra = popLowestCostFromListB();
+                listA.add(lowestCostDijkstra.getShortestPath());
+                rootPathCost = lowestCostDijkstra.getRootPathCost();
+            }
+
+
             System.out.print("\n><><><><><>< listA -- ");
             printLisOfLis(listA);
             System.out.println("\n><><><><><>< listB ><><><><><>< ");

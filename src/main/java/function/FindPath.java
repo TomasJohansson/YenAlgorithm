@@ -74,6 +74,7 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
         context.setVariable("maxPredecessors", maxPredecessors);
 //        System.out.println("{{{{{{{{}}}}}}} distance.size = " + distance.size());
         if(distance.size() <= 1){
+            distance = null;
             return null;
         }else {
             LinkedList<OrientVertex> result = getPath();
@@ -84,7 +85,6 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
             }
             dijResult.setRootPathCost(rootPathCost);
             distance = null;
-
             return dijResult;
         }
     }
