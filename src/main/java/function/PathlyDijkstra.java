@@ -3,6 +3,7 @@ package function;
 
 import com.orientechnologies.common.collection.OMultiValue;
 import com.orientechnologies.common.types.OModifiableBoolean;
+import com.orientechnologies.orient.core.command.OBasicCommandContext;
 import com.orientechnologies.orient.core.command.OCommandContext;
 import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
@@ -19,10 +20,6 @@ import model.DijkstraResult;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-
-/**
- * Created by Tkaewkunha on 1/22/16.
- */
 
 public class PathlyDijkstra extends FindPath {
     public static final String NAME = "dijkstra";
@@ -74,8 +71,8 @@ public class PathlyDijkstra extends FindPath {
         }
     }
 
-    public Object execute(Object o, OIdentifiable oIdentifiable, Object o1, Object[] objects, OCommandContext oCommandContext) {
-        return null;
+    public DijkstraResult execute(Object o, OIdentifiable oIdentifiable, Object o1, Object[] objects, OCommandContext oCommandContext) {
+        return this.executePathlyDij(o, oIdentifiable, o1, objects, oCommandContext, null, new String[]{null});
     }
 
     public String getSyntax() {
