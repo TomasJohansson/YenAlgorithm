@@ -1,5 +1,6 @@
 package function;
 
+import com.oracle.tools.packager.Log;
 import com.orientechnologies.orient.core.command.OCommandContext;
 import com.orientechnologies.orient.core.command.OCommandExecutorAbstract;
 import com.orientechnologies.orient.core.id.ORID;
@@ -72,7 +73,6 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
         context.setVariable("maxSettled", maxSettled);
         context.setVariable("maxUnSettled", maxUnSettled);
         context.setVariable("maxPredecessors", maxPredecessors);
-//        System.out.println("{{{{{{{{}}}}}}} distance.size = " + distance.size());
         if(distance.size() <= 1){
             distance = null;
             return null;

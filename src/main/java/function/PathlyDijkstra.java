@@ -37,8 +37,10 @@ public class PathlyDijkstra extends FindPath {
         final OModifiableBoolean shutdownFlag = new OModifiableBoolean();
         ODatabaseDocumentInternal curDb = ODatabaseRecordThreadLocal.INSTANCE.get();
         final OrientBaseGraph graph = OGraphCommandExecutorSQLFactory.getGraph(false, shutdownFlag);
+        //Set spur and ignore nod
         spurNode = first;
         ignoredNode = second;
+
         try {
 
             final ORecord record = iCurrentRecord != null ? iCurrentRecord.getRecord() : null;
@@ -60,6 +62,7 @@ public class PathlyDijkstra extends FindPath {
 
 
             paramWeightFieldName = OStringSerializerHelper.getStringContent(iParams[2]);
+            //Add Direction
             if (iParams.length > 3) {
                 paramDirection = Direction.valueOf(iParams[3].toString().toUpperCase());
             }
