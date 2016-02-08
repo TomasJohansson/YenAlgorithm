@@ -29,9 +29,9 @@ public class PriceDijkstraTester {
                 Set<String> ex =new HashSet<String>();
 
                 //------------------------------------------------
-                Vertex start = g.getVertex("#12:4");
-                Vertex end = g.getVertex("#12:6");
-//                ex.add("#13:0");
+                Vertex start = g.getVertex("#12:0");
+                Vertex end = g.getVertex("#12:5");
+                ex.add("#15:2");
 //                ex.add("#13:8");
 
                 Direction direction = Direction.OUT;

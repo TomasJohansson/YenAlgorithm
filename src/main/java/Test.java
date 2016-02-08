@@ -1,6 +1,7 @@
 import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
@@ -27,7 +28,14 @@ public class Test {
                 OrientGraph g = new OrientGraph("remote:128.199.166.185/"+nomeDb);
                 DijkstraExcl d = new DijkstraExcl(g, "Path", "distance");
                 Set<String> ex =new HashSet<String>();
-                d.test("#15:0");
+//                ex.add("#14:6");
+                Edge e = g.getEdge("#15:9");
+                WeightInfo wi = d.findBestPrice(e,"#12:0","#12:2",ex);
+                System.out.println("weight :" + wi.getWeight().toString());
+                System.out.println("trans rid :" + wi.getTransRid());
+                System.out.println("edge rid :" + wi.getEdgeRid());
+                System.out.println("start :" + wi.getStart());
+                System.out.println("end :" + wi.getEnd());
                 g.shutdown();
             }
             else{

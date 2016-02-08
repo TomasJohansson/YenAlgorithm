@@ -1,10 +1,14 @@
 /**
  * Created by Tkaewkunha on 2/4/16.
  */
+import java.sql.Array;
 import java.util.*;
 
+import com.orientechnologies.orient.core.db.record.OTrackedList;
+import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientElement;
 import com.tinkerpop.blueprints.impls.orient.OrientElementIterable;
@@ -19,6 +23,7 @@ public class DijkstraExcl {
     private Map<String, String> childAndParent;          //childAndParent(i)     < @rid, previous_node_in_the_shortest_path >
     private String eClass;     //edge class to use
     private String prop;       //VertexWeight property to use on the edge
+    private List<WeightInfo> weightInfos;
 
     public DijkstraExcl(OrientGraph g, String e, String p) {
         this.g = g;
@@ -28,19 +33,7 @@ public class DijkstraExcl {
         toVisits = new HashSet<String>();
         VertexWeight = new HashMap<String, Float>();
         childAndParent = new HashMap<String, String>();
-    }
-    public void test(String rid){
-        Edge e = g.getEdge(rid);
-//        System.out.println(e.getProperty("distance").toString());
-        System.out.println(e.toString());
-
-        OrientElementIterable or = e.getProperty("transportations");
-        Iterator<OrientElement> els = or.iterator();
-        while(els.hasNext()){
-            OrientElement el = els.next();
-            System.out.println(el.getProperty("name").toString());
-//            System.out.println(el.getProperty("category").toString());
-        }
+        weightInfos = new ArrayList<WeightInfo>();
 
     }
     private void findPath(Vertex startV, Vertex endV, Direction dir, Set<String> excludeEdgeRids) {
@@ -50,6 +43,7 @@ public class DijkstraExcl {
         toVisits.clear();
         VertexWeight.clear();
         childAndParent.clear();
+        weightInfos.clear();
 
         System.out.print("\n ---------------------  Start Step1  --------------------- \n");
 
@@ -67,6 +61,8 @@ public class DijkstraExcl {
 //        printMap(VertexWeight);
 
         childAndParent.put(startV.getId().toString(), null);     //childAndParent(startV) = null
+        //เพิ่มสายรถ ขอ  step 1;
+        
         toVisits.remove(startV.getId().toString());        //startV visited => removed from toVisits
         visited.add(startV.getId().toString());           //and added in visited
 
@@ -171,6 +167,7 @@ public class DijkstraExcl {
                     }
                     //Important!!!
                     System.out.println("\n  *** childAndParent.put child :" + neighbor+" parent : " + newVisited + "\n");
+
                     childAndParent.put(neighbor, newVisited);
                     //Add edge's rid and Transportation rid here
 
@@ -178,10 +175,6 @@ public class DijkstraExcl {
                     printMap2(VertexWeight);
                     System.out.println(" --- Children And parent  :");
                     printMap2(childAndParent);
-//                    System.out.println("--- toVisit :");
-//                    printSetString(toVisits);
-//                    System.out.println("--- visited :");
-//                    printSetString(visited);
                 }
 
             }
@@ -203,6 +196,7 @@ public class DijkstraExcl {
     private float calculateWeight(String start, String end, Direction dir, Set<String> excl) {        //in case of multiple/duplicate edges return the lightest
         Float initWeight = Float.MAX_VALUE;
         Float propWeight;
+        String endId = end;
         end = "v(Station)[" + end + "]";
 
         if (excl == null) {
@@ -220,21 +214,16 @@ public class DijkstraExcl {
         Set<Edge> excludeIgnoredEdge = new HashSet<Edge>();
         while (parentEdge.hasNext()) {
             Edge e = parentEdge.next();
-            if ((e.getProperty("out").toString().equals(end) || e.getProperty("in").toString().equals(end))
-                    && !excl.contains(e.getId().toString())) {
+            if ((e.getProperty("out").toString().equals(end) || e.getProperty("in").toString().equals(end))) {
                 excludeIgnoredEdge.add(e);
             }
         }
         System.out.print("--- UseEdge : ");
         printSetEdge(excludeIgnoredEdge);
         Iterator<Edge> useEdges = excludeIgnoredEdge.iterator();
-
         Edge bestEdge = null;
         while (useEdges.hasNext()) {
             Edge edge = useEdges.next();
-            //Prop wieght must be price , Find best price from edge @rid and compare all Transportation's price
-            //Find Previous direction
-            // Then should make ignoring some Transportation here if have to.
             propWeight = edge.getProperty(prop);
             if (propWeight < initWeight) {
                 initWeight = propWeight;
@@ -251,6 +240,106 @@ public class DijkstraExcl {
         }
         System.out.println("//--- End of calculateWieght :" + initWeight);
         return initWeight;
+    }
+    private WeightInfo calulateWeight2(String start, String end, Direction dir, Set<String> excl) {
+        WeightInfo weightInfo = new WeightInfo();
+        weightInfo.setWeight(Float.MAX_VALUE);
+
+        Float propWeight;
+        String endId = end;
+        end = "v(Station)[" + end + "]";
+
+        if (excl == null) {
+            excl = new HashSet<String>();
+        }
+
+        System.out.println("\n### --- calculateWeight() --- ###");
+        System.out.println("--- Parent : " + start);
+        System.out.println("--- Children : " + end);
+        System.out.print("--- ExcludeEdge : ");
+        printSetString(excl);
+
+        Vertex parentVertex = g.getVertex(start);
+        Iterator<Edge> parentEdge = parentVertex.getEdges(dir, eClass).iterator();
+        Set<Edge> excludeIgnoredEdge = new HashSet<Edge>();
+        while (parentEdge.hasNext()) {
+            Edge e = parentEdge.next();
+            if ((e.getProperty("out").toString().equals(end) || e.getProperty("in").toString().equals(end))) {
+                excludeIgnoredEdge.add(e);
+            }
+        }
+        System.out.print("--- UseEdge : ");
+        printSetEdge(excludeIgnoredEdge);
+        Iterator<Edge> useEdges = excludeIgnoredEdge.iterator();
+        WeightInfo wi;
+
+        while (useEdges.hasNext()) {
+            Edge edge = useEdges.next();
+//            findBestPrice(edge,start,endId);
+            //Prop wieght must be price , Find best price from edge @rid and compare all Transportation's price
+            //Find Previous direction
+            // Then should make ignoring some Transportation here if have to.
+            wi = findBestPrice(edge,start,endId,excl);
+            if (wi.getWeight() < weightInfo.getWeight()) {
+                weightInfo = wi;
+                System.out.println("--- Change Weight : " + weightInfo.weight);
+            }
+
+        }
+        //before return the weight have to transportation RID and Path RID
+
+        System.out.println("//--- End of calculateWieght :" + weightInfo.weight);
+        return null;
+    }
+    public WeightInfo findBestPrice(Edge edge,String start,String end,Set<String> excl){
+        WeightInfo wi = new WeightInfo();
+        wi.setEdgeRid(edge.getId().toString());
+        wi.setEnd(end);
+        wi.setStart(start);
+        wi.setWeight(Float.MAX_VALUE);
+
+        System.out.println("----- Finding Best Price");
+        System.out.println("edge :"+ edge.getId().toString());
+        System.out.println("Start :" + start);
+        System.out.println("End :" + end);
+        System.out.println("----- ");
+
+
+        OrientElementIterable trans = edge.getProperty("transportations");
+        Iterator<OrientElement> transI = trans.iterator();
+        Set<OrientElement> excludeIgnoredStran = new HashSet<OrientElement>();
+
+        while(transI.hasNext()){
+            OrientElement tr = transI.next();
+            if(!excl.contains(tr.getId().toString())){
+                excludeIgnoredStran.add(tr);
+            }
+        }
+        transI = excludeIgnoredStran.iterator();
+        while(transI.hasNext()){
+            //หา Rid ขอ Path ล่าสุดออกมา เพื่อเช็คว่าเป็นรถสายเดียวกันหรือไม่
+            OrientElement tr = transI.next();
+            System.out.println("*** Trans ID : " + tr.getId().toString());
+            if(tr.getProperty("priceType").toString().equals("unfixed")){
+                OTrackedList priceRate = tr.getProperty("priceRate");
+                Iterator<ODocument> priceRateI = priceRate.iterator();
+                while (priceRateI.hasNext()){
+                    ODocument doc = priceRateI.next();
+                    ODocument startDoc = doc.field("start");
+                    ODocument endDoc = doc.field("end");
+                    System.out.println("doc : " + doc.toString());
+                    System.out.println("Start : " + startDoc.getIdentity().toString());
+                    System.out.println("End : " + endDoc.getIdentity().toString());
+                    System.out.println("Price : " + doc.field("fare").toString());
+                }
+            }else{
+
+            }
+
+        }
+        System.out.println("----- ");
+
+        return wi;
     }
 
 
