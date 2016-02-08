@@ -21,7 +21,7 @@ public class Yes {
         OrientGraphFactory factory = new OrientGraphFactory(path);
         ODatabaseRecordThreadLocal.INSTANCE.set(factory.getDatabase());
         PathlyYen yen = new PathlyYen();
-        yen.excute("#12:6","#12:11",3,"'distance'","out");
+        yen.excute("#12:0","#12:6",3,"'distance'","out");
 
 //        String nomeDb = "Demo2";
 //        try {

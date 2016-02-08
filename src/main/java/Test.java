@@ -27,15 +27,7 @@ public class Test {
                 OrientGraph g = new OrientGraph("remote:128.199.166.185/"+nomeDb);
                 DijkstraExcl d = new DijkstraExcl(g, "Path", "distance");
                 Set<String> ex =new HashSet<String>();
-
-                //------------------------------------------------
-                Vertex start = g.getVertex("#12:6");
-                Vertex end = g.getVertex("#12:11");
-
-
-                Direction direction = Direction.OUT;
-
-                d.test("#13:18");
+                d.test("#15:0");
                 g.shutdown();
             }
             else{

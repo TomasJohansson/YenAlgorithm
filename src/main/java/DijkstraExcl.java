@@ -36,22 +36,13 @@ public class DijkstraExcl {
 
         OrientElementIterable or = e.getProperty("transportations");
         Iterator<OrientElement> els = or.iterator();
-
         while(els.hasNext()){
             OrientElement el = els.next();
-            System.out.println(el.getProperty("name_th").toString());
-            System.out.println(el.getProperty("category").toString());
+            System.out.println(el.getProperty("name").toString());
+//            System.out.println(el.getProperty("category").toString());
         }
 
     }
-
-
-    //private methods
-
-    //  (Vertex start_vertex, Vertex dest_vertex, Direction.IN/OUT/BOTH, Set of edge rids to exclude)
-//private methods
-
-    //                  (Vertex start_vertex, Vertex dest_vertex, Direction.IN/OUT/BOTH, Set of edge rids to exclude)
     private void findPath(Vertex startV, Vertex endV, Direction dir, Set<String> excludeEdgeRids) {
 
         //init
@@ -187,10 +178,10 @@ public class DijkstraExcl {
                     printMap2(VertexWeight);
                     System.out.println(" --- Children And parent  :");
                     printMap2(childAndParent);
-                    System.out.println("--- toVisit :");
-                    printSetString(toVisits);
-                    System.out.println("--- visited :");
-                    printSetString(visited);
+//                    System.out.println("--- toVisit :");
+//                    printSetString(toVisits);
+//                    System.out.println("--- visited :");
+//                    printSetString(visited);
                 }
 
             }
@@ -213,9 +204,11 @@ public class DijkstraExcl {
         Float initWeight = Float.MAX_VALUE;
         Float propWeight;
         end = "v(Station)[" + end + "]";
+
         if (excl == null) {
             excl = new HashSet<String>();
         }
+
         System.out.println("\n### --- calculateWeight() --- ###");
         System.out.println("--- Parent : " + start);
         System.out.println("--- Children : " + end);
@@ -236,14 +229,25 @@ public class DijkstraExcl {
         printSetEdge(excludeIgnoredEdge);
         Iterator<Edge> useEdges = excludeIgnoredEdge.iterator();
 
+        Edge bestEdge = null;
         while (useEdges.hasNext()) {
-            Edge e = useEdges.next();
-            propWeight = e.getProperty(prop);
-
+            Edge edge = useEdges.next();
+            //Prop wieght must be price , Find best price from edge @rid and compare all Transportation's price
+            //Find Previous direction
+            // Then should make ignoring some Transportation here if have to.
+            propWeight = edge.getProperty(prop);
             if (propWeight < initWeight) {
                 initWeight = propWeight;
+                bestEdge = edge;
                 System.out.println("--- Change Weight : " + initWeight);
+                System.out.print(" --- Children And parent  :");
+                printMap2(childAndParent);
             }
+
+        }
+        //before return the weight have to transportation RID and Path RID
+        if(bestEdge != null){
+            System.out.println("--- best edge :" + bestEdge.getId().toString());
         }
         System.out.println("//--- End of calculateWieght :" + initWeight);
         return initWeight;
@@ -259,13 +263,13 @@ public class DijkstraExcl {
 
         findPath(startV, endV, dir, exclECl);
 
-        System.out.println(" --- VertexWeight  :");
+        System.out.println(" getPath--- VertexWeight  :");
         printMap2(VertexWeight);
-        System.out.println(" --- Children And parent  :");
+        System.out.println(" getPath--- Children And parent  :");
         printMap2(childAndParent);
-        System.out.println("--- toVisit :");
+        System.out.println("getPath--- toVisit :");
         printSetString(toVisits);
-        System.out.println("--- visited :");
+        System.out.println("getPath--- visited :");
         printSetString(visited);
 
         end = endV.getId().toString();

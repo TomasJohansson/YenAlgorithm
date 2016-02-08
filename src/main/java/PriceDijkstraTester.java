@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Created by Tkaewkunha on 1/22/16.
  */
-public class PriceDijkstra {
+public class PriceDijkstraTester {
 
     public static  void main(String arg[]){
 
@@ -29,8 +29,8 @@ public class PriceDijkstra {
                 Set<String> ex =new HashSet<String>();
 
                 //------------------------------------------------
-                Vertex start = g.getVertex("#12:6");
-                Vertex end = g.getVertex("#12:11");
+                Vertex start = g.getVertex("#12:4");
+                Vertex end = g.getVertex("#12:6");
 //                ex.add("#13:0");
 //                ex.add("#13:8");
 
