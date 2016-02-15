@@ -1,11 +1,10 @@
+package PriceDijkstra;
+
+import PriceDijkstra.DijkstraExcl;
 import com.orientechnologies.orient.client.remote.OServerAdmin;
-import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
-import function.PathlyYen;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -14,7 +13,7 @@ import java.util.Set;
 /**
  * Created by Tkaewkunha on 1/22/16.
  */
-public class Test {
+public class PriceDijkstraTester {
 
     public static  void main(String arg[]){
 
@@ -26,16 +25,20 @@ public class Test {
             if(serverAdmin.existsDatabase()){  // il db esiste
                 //connessione a db
                 OrientGraph g = new OrientGraph("remote:128.199.166.185/"+nomeDb);
-                DijkstraExcl d = new DijkstraExcl(g, "Path", "distance");
-                Set<String> ex =new HashSet<String>();
-//                ex.add("#14:6");
-                Edge e = g.getEdge("#15:9");
-                WeightInfo wi = d.findBestPrice(e,"#12:0","#12:2",ex);
-                System.out.println("weight :" + wi.getWeight().toString());
-                System.out.println("trans rid :" + wi.getTransRid());
-                System.out.println("edge rid :" + wi.getEdgeRid());
-                System.out.println("start :" + wi.getStart());
-                System.out.println("end :" + wi.getEnd());
+                DijkstraExcl d = new DijkstraExcl(g, "Path");
+                Set<String> excludeTrans =new HashSet<String>();
+                //------------------------------------------------
+                Vertex start = g.getVertex("#12:8");
+                Vertex end = g.getVertex("#12:10");
+//                excludeTrans.add("#14:6");
+
+                Direction direction = Direction.OUT;
+//                d.getPath(start,end,direction,ex);
+                System.out.println(d.getPath(start,end,direction,excludeTrans));
+//                System.out.println(d.getPathString(start,end,direction,ex));
+//                System.out.println(d.getWeight(start,end,direction,ex));
+                //------------------------------------------------
+                //chiude db
                 g.shutdown();
             }
             else{

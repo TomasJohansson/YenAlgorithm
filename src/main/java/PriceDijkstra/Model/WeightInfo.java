@@ -1,3 +1,5 @@
+package PriceDijkstra.Model;
+
 /**
  * Created by Tkaewkunha on 2/8/16.
  */
@@ -6,7 +8,15 @@ public class WeightInfo {
     public String start;
     public String end;
     public String transRid;
-    public String edgeRid;
+    public Float totalWeight;
+
+    public Float getTotalWeight() {
+        return totalWeight;
+    }
+
+    public void setTotalWeight(Float totalWeight) {
+        this.totalWeight = totalWeight;
+    }
 
     public Float getWeight() {
         return weight;
@@ -40,11 +50,8 @@ public class WeightInfo {
         this.transRid = transRid;
     }
 
-    public String getEdgeRid() {
-        return edgeRid;
-    }
-
-    public void setEdgeRid(String edgeRid) {
-        this.edgeRid = edgeRid;
+    @Override
+    public String toString() {
+        return "Trans :" + transRid + ", start :" + start + ", end :" + end + ",weight :"+weight+", totalWeight:" + totalWeight +"\n";
     }
 }
