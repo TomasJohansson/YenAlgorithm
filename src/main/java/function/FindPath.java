@@ -141,7 +141,7 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
         final Set<OrientVertex> neighbors = new HashSet<OrientVertex>();
         OrientVertex currentV = (OrientVertex) node;
         Iterable<Vertex> neighborList = node.getVertices(paramDirection);
-        // System.out.println("Current V : "  + currentV.getIdentity().toString());
+        System.out.println("--- getNeighbors");
         if (node != null) {
             for (Vertex v : neighborList) {
                 final OrientVertex ov = (OrientVertex) v;
@@ -152,12 +152,14 @@ public abstract class FindPath extends OSQLFunctionMathAbstract {
                         if (!checkIngnore(ov.getIdentity().toString()))
                             neighbors.add(ov);
                     } else {
+                        System.out.println("ov.category :" + ov.getProperty("category").toString());
                         neighbors.add(ov);
                     }
 
                 }
 
             }
+
 
         }
         return neighbors;

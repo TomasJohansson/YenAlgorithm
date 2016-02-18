@@ -3,12 +3,12 @@ package PriceDijkstra.Model;
 /**
  * Created by Tkaewkunha on 2/11/16.
  */
-public class TransUnfixedInfo {
+public class TransInfo {
     public String from;
     public String to;
     public Float fare;
 
-    public TransUnfixedInfo(String from, String to,Float fare) {
+    public TransInfo(String from, String to, Float fare) {
         this.from = from;
         this.fare = fare;
         this.to = to;
@@ -25,8 +25,8 @@ public class TransUnfixedInfo {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TransUnfixedInfo) {
-            TransUnfixedInfo pp = (TransUnfixedInfo) obj;
+        if (obj instanceof TransInfo) {
+            TransInfo pp = (TransInfo) obj;
             return (pp.from.equals(this.from) && pp.to.equals(this.to));
         } else {
             return false;
